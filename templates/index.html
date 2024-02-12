@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Notes</title>
+    <style>
+        body{
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+    </style>
+    <script>
+        const url=location.protocol+"//"+location.hostname+":"+location.port+"/";
+        function loadForm(){
+            note.value="";
+            cont.style.display="none";
+            form.style.display="block";
+        }
+        function deleteNote(){
+            var xmr=new XMLHttpRequest();
+            xmr.open("DELETE","/delete");
+            xmr.onreadystatechange=(()=>{
+                if(xmr.readyState===XMLHttpRequest.DONE){
+                    if(xmr.status===200){
+                        if(xmr.responseText==="Success"){
+                            alert("The note is successfully deleted.");
+                            loadForm();
+                        }else{
+                            alert("Error deleting the note;\nPlease Try Again Later");
+                        }
+                    }
+                }
+            });
+            xmr.send(null);
+        }
+        function loadNotepad(txtValue){
+            note.value=txtValue;
+            cont.style.display="block";
+            form.style.display="none";
+        }
+        function updateNote(){
+            var xmr=new XMLHttpRequest();
+            xmr.open("POST","/update");
+            var params=new URLSearchParams();
+            params.append("note",note.value);
+            xmr.onreadystatechange=(()=>{
+                if(xmr.readyState===XMLHttpRequest.DONE){
+                    if(xmr.status===200){
+                        if(xmr.responseText==="Success"){
+                            alert("Note Updated");
+                        }else if(xmr.responseText==="Empty"){
+                            alert("Please Enter Some Notes");
+                        }else if(xmr.responseText==="NoChange"){
+                            alert("You did not change any text in your notes");
+                        }else{
+                            alert("Error while updating the note. Please Try Again Later.");
+                        }
+                    }
+                }
+            });
+            xmr.send(params);
+        }
+        function sendKey(){
+            var xmr=new XMLHttpRequest();
+            var params=new URLSearchParams();
+            params.append("key",key.value);
+            xmr.open("POST","/open");
+            xmr.onreadystatechange=(()=>{
+                if(xmr.readyState===XMLHttpRequest.DONE){
+                    if(xmr.status===200){
+                        if(xmr.responseText==="NoteCreated"){
+                            loadNotepad("");
+                            alert("A note is successfully created");
+                        }else if(xmr.responseText==="KeyError"){
+                            alert("Key was not successfully hashed. Please Try Again Later.");
+                        }else{
+                            loadNotepad(xmr.responseText);
+                        }
+                    }else if(xmr.status===500){
+                        alert("Error creating a new Key. Please Try Again Later.");
+                    }
+                }
+            });
+            xmr.send(params);
+        }
+    </script>
+</head>
+<body>
+    <table id="form">
+        <form>
+            <tr>
+                <td>
+                    <label for="key">Enter your key:</label>
+                </td>
+                <td>
+                    <input id="key" name="key" maxlength="16" autofocus/>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: center;">
+                    <input type="button" value="Open" onclick="sendKey()"/>
+                </td>
+            </tr>
+        </form>
+    </table>
+    <div id="cont" style="display: none; text-align: center;">
+        <textarea id="note" style="display: block; height: 400px; width: 800px;"></textarea>
+        <input type="button" value="Update" onclick="updateNote()"/>
+        <input type="button" value="Delete" onclick="deleteNote()"/>
+    </div>
+</body>
+</html>
