@@ -8,7 +8,7 @@ from Crypto.Util.Padding import pad,unpad
 app=Flask(__name__)
 app.config.from_pyfile("config.py")
 app.secret_key=os.urandom(16)
-client=pmdb.MongoClient(app.config.get("db_client","localhost"),app.config.get("db_port",27017))
+client=pmdb.MongoClient(app.config.get("db_client","localhost:27017"))
 db=client.get_database(app.config.get("db_name","notes"))
 coll=db.get_collection(app.config.get("coll_name","notes"))
 
